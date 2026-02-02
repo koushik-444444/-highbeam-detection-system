@@ -81,88 +81,83 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
         )}
       </AnimatePresence>
 
-      {/* Main Login Overlay */}
+      {/* Main Overlay - Login on RIGHT side, car visible on LEFT/CENTER */}
       <AnimatePresence>
         {isVisible && (
-          <div className="fixed inset-0 z-10 flex items-center justify-center p-4">
-            {/* Login Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
+          <div className="fixed inset-0 z-10 pointer-events-none">
+            {/* Top Header Bar */}
+            <motion.header
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="w-full max-w-sm"
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between pointer-events-auto"
             >
-              {/* Glass Card */}
-              <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
-                {/* Top accent line */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
+              {/* Logo */}
+              <div className="flex items-center gap-3">
+                <svg viewBox="0 0 100 60" className="w-10 h-6 text-amber-500">
+                  <path
+                    fill="currentColor"
+                    d="M50 5 L20 25 L5 20 L15 35 L10 55 L30 45 L50 55 L70 45 L90 55 L85 35 L95 20 L80 25 L50 5Z"
+                  />
+                </svg>
+                <div>
+                  <span className="text-white/90 text-sm tracking-[0.2em] font-light uppercase">
+                    High Beam
+                  </span>
+                  <span className="text-amber-500/60 text-xs tracking-wider uppercase ml-2">
+                    Detection
+                  </span>
+                </div>
+              </div>
+
+              {/* Admin Link */}
+              <a
+                href="/admin"
+                className="text-white/40 hover:text-amber-500 text-xs tracking-wider uppercase transition-colors px-4 py-2"
+              >
+                Admin
+              </a>
+            </motion.header>
+
+            {/* Login Panel - RIGHT SIDE */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="absolute right-0 top-0 bottom-0 w-full max-w-sm flex items-center p-6 pointer-events-auto"
+            >
+              {/* Glass Panel */}
+              <div className="w-full bg-black/60 backdrop-blur-xl border-l border-white/10 rounded-l-2xl overflow-hidden">
+                {/* Accent line */}
+                <div className="h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
                 
                 <div className="p-8">
-                  {/* Header */}
-                  <div className="text-center mb-8">
-                    {/* Lamborghini-inspired logo */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, delay: 0.7 }}
-                      className="inline-flex items-center justify-center w-16 h-16 mb-4"
-                    >
-                      <svg viewBox="0 0 100 60" className="w-full h-full text-amber-500">
-                        <path
-                          fill="currentColor"
-                          d="M50 5 L20 25 L5 20 L15 35 L10 55 L30 45 L50 55 L70 45 L90 55 L85 35 L95 20 L80 25 L50 5Z"
-                        />
-                      </svg>
-                    </motion.div>
-                    
-                    <motion.h1
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8 }}
-                      className="text-xl font-light tracking-[0.3em] text-white uppercase"
-                    >
-                      High Beam
-                    </motion.h1>
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.9 }}
-                      className="text-amber-500/80 text-xs tracking-[0.2em] uppercase mt-1"
-                    >
-                      Detection System
-                    </motion.p>
+                  {/* Title */}
+                  <div className="mb-8">
+                    <h1 className="text-white/90 text-lg font-light tracking-[0.2em] uppercase">
+                      Vehicle Access
+                    </h1>
+                    <p className="text-white/40 text-xs mt-1 tracking-wide">
+                      Enter credentials to check violation status
+                    </p>
                   </div>
 
                   {/* Form */}
-                  <motion.form
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1 }}
-                    onSubmit={handleAuthenticate}
-                    className="space-y-5"
-                  >
+                  <form onSubmit={handleAuthenticate} className="space-y-5">
                     {/* Vehicle Number */}
                     <div className="space-y-2">
                       <label className="text-white/50 text-xs tracking-wider uppercase block">
                         Vehicle Registration
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={vehicleNumber}
-                          onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
-                          placeholder="MH 12 AB 1234"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-amber-500/50 focus:bg-white/10 transition-all duration-300 tracking-wider"
-                          autoComplete="off"
-                          spellCheck={false}
-                        />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <svg className="w-5 h-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-                          </svg>
-                        </div>
-                      </div>
+                      <input
+                        type="text"
+                        value={vehicleNumber}
+                        onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+                        placeholder="MH 12 AB 1234"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-amber-500/50 focus:bg-white/10 transition-all duration-300 tracking-wider text-sm"
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
                     </div>
 
                     {/* Date of Birth */}
@@ -170,15 +165,13 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
                       <label className="text-white/50 text-xs tracking-wider uppercase block">
                         Date of Birth
                       </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={dob}
-                          onChange={(e) => setDob(e.target.value)}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500/50 focus:bg-white/10 transition-all duration-300"
-                          style={{ colorScheme: 'dark' }}
-                        />
-                      </div>
+                      <input
+                        type="date"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500/50 focus:bg-white/10 transition-all duration-300 text-sm"
+                        style={{ colorScheme: 'dark' }}
+                      />
                     </div>
 
                     {/* Error Message */}
@@ -201,14 +194,11 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
                       disabled={isAuthenticating || !vehicleNumber || !dob}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full py-4 mt-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-semibold tracking-wider uppercase rounded-lg transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed relative overflow-hidden group"
+                      className="w-full py-4 mt-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-semibold tracking-wider uppercase rounded-lg transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed relative overflow-hidden text-sm"
                     >
                       <span className={isAuthenticating ? 'opacity-0' : 'opacity-100'}>
                         Authenticate
                       </span>
-                      
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                       
                       {/* Loading spinner */}
                       {isAuthenticating && (
@@ -217,33 +207,28 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
                         </div>
                       )}
                     </motion.button>
-                  </motion.form>
+                  </form>
 
                   {/* Footer */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.2 }}
-                    className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between"
-                  >
-                    <p className="text-white/30 text-xs">
-                      AI Detection System
+                  <div className="mt-8 pt-6 border-t border-white/10">
+                    <p className="text-white/30 text-xs text-center">
+                      AI-Powered Detection System
                     </p>
-                    <a
-                      href="/admin"
-                      className="text-amber-500/60 hover:text-amber-500 text-xs tracking-wider uppercase transition-colors"
-                    >
-                      Admin
-                    </a>
-                  </motion.div>
+                  </div>
                 </div>
-
-                {/* Bottom accent */}
-                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               </div>
+            </motion.div>
 
-              {/* Ambient glow */}
-              <div className="absolute -inset-4 bg-amber-500/5 rounded-3xl blur-2xl -z-10" />
+            {/* Bottom info - LEFT SIDE (over the car area) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="absolute bottom-6 left-6 pointer-events-none"
+            >
+              <p className="text-white/20 text-xs tracking-[0.15em] uppercase">
+                Intelligent High Beam Detection
+              </p>
             </motion.div>
           </div>
         )}
