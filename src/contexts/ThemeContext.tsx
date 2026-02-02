@@ -44,6 +44,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('theme', theme);
       document.documentElement.classList.remove('dark', 'light');
       document.documentElement.classList.add(theme);
+      
+      // Also update body background for immediate visual feedback
+      if (theme === 'light') {
+        document.body.style.backgroundColor = '#f8fafc';
+        document.body.style.color = '#0f172a';
+      } else {
+        document.body.style.backgroundColor = '#050505';
+        document.body.style.color = '#f0f0f0';
+      }
     }
   }, [theme, mounted]);
 

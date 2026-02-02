@@ -316,7 +316,7 @@ export default function AdminPage() {
   // Login Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-300" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         {/* Background gradient */}
         <div className="fixed inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-red-950/20 via-transparent to-orange-950/20" />
@@ -387,10 +387,6 @@ export default function AdminPage() {
                   )}
                 </motion.button>
               </form>
-
-              <p className="mt-6 pt-4 border-t border-white/5 text-center text-white/30 text-[10px] tracking-wider">
-                Demo: admin@highbeam.gov / admin123
-              </p>
             </div>
           </div>
         </motion.div>
@@ -404,7 +400,7 @@ export default function AdminPage() {
 
   // Admin Dashboard
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-red-950/10 via-transparent to-orange-950/10" />
