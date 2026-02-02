@@ -30,8 +30,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files - NEVER commit these
 .env*
+.env.local
+.env.production
+.env.development
 
 # vercel
 .vercel
@@ -39,3 +42,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Database migrations and seeds (keep locally, don't commit)
+/supabase/
+/src/scripts/
+
+# Credentials and secrets
+*.key
+*.pem
+*.p12
+credentials.json
+service-account.json
