@@ -97,7 +97,7 @@ export default function LamboHighBeamBackground({
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Draw frame to canvas
+  // Draw frame to canvas - crops out Veo watermark from bottom-right
   const drawFrame = useCallback((ctx: CanvasRenderingContext2D, image: HTMLImageElement) => {
     const canvas = ctx.canvas;
     const dpr = window.devicePixelRatio || 1;
@@ -107,16 +107,49 @@ export default function LamboHighBeamBackground({
     const imgWidth = image.naturalWidth || image.width;
     const imgHeight = image.naturalHeight || image.height;
     
-    // Cover scaling
-    const scale = Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight);
-    const scaledWidth = imgWidth * scale;
-    const scaledHeight = imgHeight * scale;
-    const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    // Crop settings to remove Veo watermark (bottom-right corner)
+    // Original frame: 800x450, watermark is ~120x35px in bottom-right
+    const cropRight = 0; // pixels to crop from right
+    const cropBottom = 40; // pixels to crop from bottom (hides watermark)
+    const cropTop = 0;
+    const cropLeft = 0;
     
+    // Source dimensions (what we're taking from the image)
+    const srcX = cropLeft;
+    const srcY = cropTop;
+    const srcWidth = imgWidth - cropLeft - cropRight;
+    const srcHeight = imgHeight - cropTop - cropBottom;
+    
+    // Calculate cover scaling for cropped source
+    const srcAspect = srcWidth / srcHeight;
+    const canvasAspect = canvasWidth / canvasHeight;
+    
+    let destWidth, destHeight, destX, destY;
+    
+    if (canvasAspect > srcAspect) {
+      // Canvas is wider - fit to width
+      destWidth = canvasWidth;
+      destHeight = canvasWidth / srcAspect;
+      destX = 0;
+      destY = (canvasHeight - destHeight) / 2;
+    } else {
+      // Canvas is taller - fit to height
+      destHeight = canvasHeight;
+      destWidth = canvasHeight * srcAspect;
+      destX = (canvasWidth - destWidth) / 2;
+      destY = 0;
+    }
+    
+    // Clear canvas
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    ctx.drawImage(image, x, y, scaledWidth, scaledHeight);
+    
+    // Draw cropped image (excludes watermark area)
+    ctx.drawImage(
+      image,
+      srcX, srcY, srcWidth, srcHeight,  // Source rectangle (crops out watermark)
+      destX, destY, destWidth, destHeight // Destination rectangle (fills canvas)
+    );
   }, []);
 
   // Animation loop
