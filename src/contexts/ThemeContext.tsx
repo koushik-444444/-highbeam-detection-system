@@ -46,9 +46,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       document.documentElement.classList.add(theme);
       
       // Also update body background for immediate visual feedback
+      // Light theme uses slate-800 (#1e293b) for softer look
       if (theme === 'light') {
-        document.body.style.backgroundColor = '#f8fafc';
-        document.body.style.color = '#0f172a';
+        document.body.style.backgroundColor = '#1e293b';
+        document.body.style.color = '#f1f5f9';
       } else {
         document.body.style.backgroundColor = '#050505';
         document.body.style.color = '#f0f0f0';
