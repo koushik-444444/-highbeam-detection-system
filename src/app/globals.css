@@ -53,12 +53,11 @@ html.light {
   --font-mono: 'SF Mono', 'Fira Code', monospace;
 }
 
-/* Base HTML/Body - No scroll, full viewport */
+/* Base HTML/Body */
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   background: var(--lambo-dark);
   color: var(--foreground);
