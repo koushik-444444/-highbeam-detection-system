@@ -4,23 +4,21 @@ import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import LamboLoginOverlay from '@/components/LamboLoginOverlay';
 
-// Dynamically import background to avoid SSR issues with canvas
+// Dynamic import for canvas component
 const LamboHighBeamBackground = dynamic(
   () => import('@/components/LamboHighBeamBackground'),
   { 
     ssr: false,
     loading: () => (
-      <div 
-        className="fixed inset-0 flex items-center justify-center"
-        style={{ backgroundColor: '#050505' }}
-      >
+      <div className="fixed inset-0 bg-[#050505] flex items-center justify-center">
         <div className="flex flex-col items-center gap-6">
-          <div className="w-12 h-12 text-white/20">
-            <svg viewBox="0 0 48 48" className="w-full h-full">
-              <circle cx="24" cy="24" r="4" fill="currentColor"/>
-            </svg>
-          </div>
-          <span className="text-white/20 text-[10px] tracking-[0.2em] uppercase">
+          <svg viewBox="0 0 100 60" className="w-16 h-10 text-amber-500/50">
+            <path
+              fill="currentColor"
+              d="M50 5 L20 25 L5 20 L15 35 L10 55 L30 45 L50 55 L70 45 L90 55 L85 35 L95 20 L80 25 L50 5Z"
+            />
+          </svg>
+          <span className="text-white/30 text-xs tracking-[0.2em] uppercase">
             Initializing
           </span>
         </div>
@@ -30,30 +28,19 @@ const LamboHighBeamBackground = dynamic(
 );
 
 export default function LamboLoginPage() {
-  const [animationComplete, setAnimationComplete] = useState(false);
+  const [animationReady, setAnimationReady] = useState(false);
 
-  // Called when background completes animation cycle
   const handleAnimationComplete = useCallback(() => {
-    setAnimationComplete(true);
+    setAnimationReady(true);
   }, []);
 
   return (
-    <div 
-      className="fixed inset-0 overflow-hidden"
-      style={{ backgroundColor: '#050505' }}
-    >
-      {/* Cinematic Background Animation */}
-      <LamboHighBeamBackground
-        onAnimationComplete={handleAnimationComplete}
-      />
+    <div className="fixed inset-0 overflow-hidden bg-[#050505]">
+      {/* Full-screen looping animation background */}
+      <LamboHighBeamBackground onAnimationComplete={handleAnimationComplete} />
 
-      {/* Login UI Overlay - Always visible, floats above background */}
+      {/* Premium login overlay */}
       <LamboLoginOverlay isVisible={true} />
-
-      {/* Preload key frames for smoother experience */}
-      <link rel="preload" as="image" href="/loading/frame_00.jpg" />
-      <link rel="preload" as="image" href="/loading/frame_17.jpg" />
-      <link rel="preload" as="image" href="/loading/frame_23.jpg" />
     </div>
   );
 }
