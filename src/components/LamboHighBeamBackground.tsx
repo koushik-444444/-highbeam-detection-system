@@ -275,8 +275,9 @@ export default function LamboHighBeamBackground({
   // Calculate effects intensity based on current frame
   // Frames 60-120 are typically the "high beam on + approaching" phase
   const effectsIntensity = Math.min(1, Math.max(0, (currentFrame - 40) / 80));
-  const zoomScale = 1 + (effectsIntensity * 0.03); // Subtle 3% zoom at peak
-  const lensFlareOpacity = effectsIntensity * 0.4;
+  // DISABLED zoom and lens flare to keep video crisp
+  const zoomScale = 1; // No zoom - keeps video sharp
+  const lensFlareOpacity = 0; // No lens flare - keeps video crisp
 
   return (
     <div className="fixed inset-0 z-0" style={{ backgroundColor: '#050505' }}>
@@ -340,43 +341,46 @@ export default function LamboHighBeamBackground({
         />
       </motion.div>
 
-      {/* Lens Flare Effect - appears when headlights are bright */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: isLoading ? 0 : lensFlareOpacity }}
-        transition={{ duration: 0.2 }}
-      >
-        {/* Central headlight glow */}
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px]"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(200,230,255,0.15) 0%, rgba(100,180,255,0.05) 40%, transparent 70%)',
-          }}
-        />
-        {/* Horizontal lens streak */}
-        <div 
-          className="absolute top-[45%] left-0 right-0 h-[2px]"
-          style={{
-            background: 'linear-gradient(90deg, transparent 20%, rgba(200,230,255,0.1) 40%, rgba(255,255,255,0.2) 50%, rgba(200,230,255,0.1) 60%, transparent 80%)',
-          }}
-        />
-        {/* Secondary flare spots */}
-        <div 
-          className="absolute top-[40%] left-[30%] w-8 h-8 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(100,200,255,0.2) 0%, transparent 70%)',
-          }}
-        />
-        <div 
-          className="absolute top-[50%] left-[65%] w-12 h-12 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(150,200,255,0.15) 0%, transparent 70%)',
-          }}
-        />
-      </motion.div>
+      {/* Lens Flare Effect - DISABLED for crisp video */}
+      {/* Keeping the structure but with 0 opacity */}
+      {false && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: isLoading ? 0 : lensFlareOpacity }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* Central headlight glow */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px]"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgba(200,230,255,0.15) 0%, rgba(100,180,255,0.05) 40%, transparent 70%)',
+            }}
+          />
+          {/* Horizontal lens streak */}
+          <div 
+            className="absolute top-[45%] left-0 right-0 h-[2px]"
+            style={{
+              background: 'linear-gradient(90deg, transparent 20%, rgba(200,230,255,0.1) 40%, rgba(255,255,255,0.2) 50%, rgba(200,230,255,0.1) 60%, transparent 80%)',
+            }}
+          />
+          {/* Secondary flare spots */}
+          <div 
+            className="absolute top-[40%] left-[30%] w-8 h-8 rounded-full"
+            style={{
+              background: 'radial-gradient(circle, rgba(100,200,255,0.2) 0%, transparent 70%)',
+            }}
+          />
+          <div 
+            className="absolute top-[50%] left-[65%] w-12 h-12 rounded-full"
+            style={{
+              background: 'radial-gradient(circle, rgba(150,200,255,0.15) 0%, transparent 70%)',
+            }}
+          />
+        </motion.div>
+      )}
 
-      {/* Floating Particles */}
-      {!isLoading && (
+      {/* Floating Particles - DISABLED for crisp video */}
+      {false && !isLoading && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {particlesRef.current.map((particle, i) => (
             <motion.div
@@ -402,34 +406,40 @@ export default function LamboHighBeamBackground({
         </div>
       )}
 
-      {/* Vignette Overlay - subtle framing */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `
-            radial-gradient(ellipse 90% 80% at 50% 50%, 
-              transparent 0%, 
-              transparent 60%, 
-              rgba(0,0,0,0.2) 85%, 
-              rgba(0,0,0,0.4) 100%
-            )
-          `,
-        }}
-      />
+      {/* Vignette Overlay - DISABLED for crisp video */}
+      {false && (
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(ellipse 90% 80% at 50% 50%, 
+                transparent 0%, 
+                transparent 60%, 
+                rgba(0,0,0,0.2) 85%, 
+                rgba(0,0,0,0.4) 100%
+              )
+            `,
+          }}
+        />
+      )}
 
-      {/* Top and bottom gradient bars - very subtle */}
-      <div 
-        className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)',
-        }}
-      />
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%)',
-        }}
-      />
+      {/* Top and bottom gradient bars - DISABLED for crisp video */}
+      {false && (
+        <>
+          <div 
+            className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)',
+            }}
+          />
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%)',
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

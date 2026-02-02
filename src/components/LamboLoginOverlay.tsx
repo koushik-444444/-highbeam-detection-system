@@ -159,8 +159,8 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
                   }}
                 />
                 
-                {/* Main card - more transparent to show car */}
-                <div className="relative bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+                {/* Main card - transparent without blur to keep video crisp */}
+                <div className="relative bg-black/40 border border-white/10 rounded-2xl overflow-hidden">
                   {/* Animated top accent line */}
                   <motion.div 
                     className="h-[1px]"
