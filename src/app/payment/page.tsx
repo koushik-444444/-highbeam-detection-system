@@ -15,7 +15,10 @@ import {
   Lock,
   AlertCircle,
   Loader2,
-  Info
+  Info,
+  Activity,
+  Zap,
+  Award
 } from 'lucide-react';
 
 interface Violation {
@@ -382,16 +385,124 @@ Real payments require Razorpay setup.
               exit={{ opacity: 0, scale: 0.9 }}
               className="flex items-center justify-center min-h-[60vh]"
             >
-              <GlassCard className="p-12 text-center max-w-md" hover={false}>
-                <div className="w-24 h-24 mx-auto mb-6 relative">
-                  <div className="absolute inset-0 border-4 border-cyan-500/30 rounded-full" />
-                  <div className="absolute inset-0 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-                  <CreditCard className="absolute inset-0 m-auto w-10 h-10 text-cyan-400" />
+              <div className="p-12 text-center max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl relative overflow-hidden">
+                {/* Engine Start Animation */}
+                <motion.div 
+                  className="w-24 h-24 mx-auto mb-6 relative"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  <div className="absolute inset-0 border-t-2 border-cyan-500 rounded-full" />
+                  <div className="absolute inset-2 border-t-2 border-cyan-500/50 rounded-full" />
+                  <div className="absolute inset-4 border-t-2 border-cyan-500/20 rounded-full" />
+                  <Activity className="absolute inset-0 m-auto w-8 h-8 text-cyan-400" />
+                </motion.div>
+                
+                <h2 className="text-2xl font-bold text-white mb-2 tracking-widest uppercase italic">Settling Fine</h2>
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+                  <p className="text-white/60 text-xs tracking-[0.3em] uppercase">Engineered for speed</p>
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-2">Processing Payment</h2>
-                <p className="text-white/60">Simulating payment process...</p>
-                <p className="text-yellow-400 text-sm mt-4">Demo Mode</p>
-              </GlassCard>
+                
+                {/* Progress bar */}
+                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-1/2 h-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 3: Success */}
+          {step === 'success' && transactionDetails && (
+            <motion.div
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="flex items-center justify-center min-h-[60vh]"
+            >
+              <div className="p-8 text-center max-w-lg w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl relative">
+                {/* Success Glow */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 bg-green-500/20 rounded-full blur-[60px]" />
+                
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', damping: 12, stiffness: 100, delay: 0.2 }}
+                  className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.3)]"
+                >
+                  <CheckCircle className="w-10 h-10 text-white" />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <h2 className="text-3xl font-black text-white mb-1 tracking-tight uppercase italic">Transaction Complete</h2>
+                  <div className="flex items-center justify-center gap-2 mb-6 text-green-400">
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-bold">Record Cleared</span>
+                  </div>
+
+                  {/* Road Honor Score Card */}
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="bg-gradient-to-br from-white/[0.05] to-transparent border border-white/10 rounded-2xl p-4 mb-6 relative group overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                          <Award className="w-5 h-5 text-yellow-500" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-[10px] text-white/40 uppercase tracking-widest">Road Honor Score</p>
+                          <p className="text-lg font-bold text-white tracking-tight">920 / 1000</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-green-400 font-bold uppercase tracking-tighter bg-green-400/10 px-2 py-0.5 rounded border border-green-400/20">+15 XP</span>
+                      </div>
+                    </div>
+                    {/* Progress indicator */}
+                    <div className="mt-3 w-full h-[3px] bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: '92%' }}
+                        transition={{ duration: 1, delay: 1 }}
+                        className="h-full bg-yellow-500"
+                      />
+                    </div>
+                  </motion.div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleDownloadReceipt}
+                      className="py-3.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest"
+                    >
+                      <Download className="w-4 h-4" />
+                      Receipt
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(6,182,212,0.3)' }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => router.push('/dashboard')}
+                      className="py-3.5 bg-cyan-500 text-black rounded-xl font-bold uppercase tracking-widest text-xs transition-all"
+                    >
+                      Dashboard
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           )}
 

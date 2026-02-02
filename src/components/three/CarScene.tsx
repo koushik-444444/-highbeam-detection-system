@@ -13,7 +13,15 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
 // Stylized Sports Car Component
-function SportsCar({ position = [0, 0, 0] }: { position?: [number, number, number] }) {
+function SportsCar({ 
+  position = [0, 0, 0],
+  violationIntensity = 0,
+  focusSide = 'both'
+}: { 
+  position?: [number, number, number],
+  violationIntensity?: number,
+  focusSide?: 'left' | 'right' | 'both'
+}) {
   const carRef = useRef<THREE.Group>(null);
   const leftHeadlightRef = useRef<THREE.PointLight>(null);
   const rightHeadlightRef = useRef<THREE.PointLight>(null);
@@ -25,10 +33,22 @@ function SportsCar({ position = [0, 0, 0] }: { position?: [number, number, numbe
       carRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.03;
     }
     
-    // Subtle pulsating headlights
-    const intensity = 8 + Math.sin(state.clock.elapsedTime * 2) * 2;
-    if (leftHeadlightRef.current) leftHeadlightRef.current.intensity = intensity;
-    if (rightHeadlightRef.current) rightHeadlightRef.current.intensity = intensity;
+    // Calculate light intensity based on violation or idle state
+    const baseIntensity = violationIntensity > 0 ? (violationIntensity / 5) : 8;
+    const pulse = Math.sin(state.clock.elapsedTime * (violationIntensity > 0 ? 5 : 2)) * (violationIntensity > 0 ? 5 : 2);
+    const finalIntensity = baseIntensity + pulse;
+
+    if (leftHeadlightRef.current && (focusSide === 'left' || focusSide === 'both')) {
+      leftHeadlightRef.current.intensity = finalIntensity;
+    } else if (leftHeadlightRef.current) {
+      leftHeadlightRef.current.intensity = 2; // Dim if not focused
+    }
+
+    if (rightHeadlightRef.current && (focusSide === 'right' || focusSide === 'both')) {
+      rightHeadlightRef.current.intensity = finalIntensity;
+    } else if (rightHeadlightRef.current) {
+      rightHeadlightRef.current.intensity = 2; // Dim if not focused
+    }
   });
 
   return (
@@ -282,7 +302,13 @@ function PoliceScannerLight() {
 }
 
 // Main Scene Component
-function Scene() {
+function Scene({ 
+  violationIntensity = 0,
+  focusSide = 'both'
+}: { 
+  violationIntensity?: number,
+  focusSide?: 'left' | 'right' | 'both'
+}) {
   return (
     <>
       {/* Ambient Light - Increased for visibility */}
@@ -308,7 +334,11 @@ function Scene() {
       
       {/* The Car - Positioned for better visibility */}
       <Float speed={0.5} rotationIntensity={0.05} floatIntensity={0.2}>
-        <SportsCar position={[0, 0, -2]} />
+        <SportsCar 
+          position={[0, 0, -2]} 
+          violationIntensity={violationIntensity}
+          focusSide={focusSide}
+        />
       </Float>
       
       {/* Headlight Beams - Subtle */}
@@ -343,7 +373,13 @@ function Scene() {
 }
 
 // Exported Canvas Component
-export default function CarScene() {
+export default function CarScene({ 
+  violationIntensity = 0,
+  focusSide = 'both'
+}: { 
+  violationIntensity?: number,
+  focusSide?: 'left' | 'right' | 'both'
+}) {
   return (
     <div className="absolute inset-0 w-full h-full">
       <Canvas
@@ -352,7 +388,7 @@ export default function CarScene() {
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
       >
-        <Scene />
+        <Scene violationIntensity={violationIntensity} focusSide={focusSide} />
       </Canvas>
     </div>
   );

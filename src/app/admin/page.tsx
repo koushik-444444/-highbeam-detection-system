@@ -34,6 +34,7 @@ import { useKeyboardShortcuts, KeyboardShortcutsModal } from '@/hooks/useKeyboar
 import { SoundToggle } from '@/hooks/useSound';
 import { AdminSkeleton } from '@/components/Skeleton';
 import AnalyticsCharts from '@/components/admin/AnalyticsCharts';
+import EvidenceScanner from '@/components/EvidenceScanner';
 import { exportToCSV } from '@/lib/exportData';
 
 interface Violation {
@@ -822,8 +823,12 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              <div className="aspect-video bg-white/5 rounded-xl mb-4 flex items-center justify-center">
-                <Camera className="w-10 h-10 text-white/20" />
+              <div className="mb-4">
+                <EvidenceScanner 
+                  imageUrl={selectedViolation.evidenceImageUrl}
+                  intensity={selectedViolation.beamIntensity}
+                  confidence={selectedViolation.aiConfidence}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm mb-4">

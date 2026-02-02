@@ -22,7 +22,8 @@ import {
   Download,
   List,
   GitBranch,
-  Keyboard
+  Keyboard,
+  Radar
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/contexts/ToastContext';
@@ -32,6 +33,9 @@ import { useKeyboardShortcuts, KeyboardShortcutsModal } from '@/hooks/useKeyboar
 import { SoundToggle } from '@/hooks/useSound';
 import { DashboardSkeleton } from '@/components/Skeleton';
 import ViolationTimeline from '@/components/ViolationTimeline';
+import EvidenceScanner from '@/components/EvidenceScanner';
+import ViolationRadar from '@/components/ViolationRadar';
+import CarScene from '@/components/three/CarScene';
 import { generateChallanPDF } from '@/lib/pdfGenerator';
 
 interface Violation {
@@ -75,7 +79,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedViolation, setSelectedViolation] = useState<Violation | null>(null);
   const [showEvidence, setShowEvidence] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
+  const [evidenceMode, setEvidenceMode] = useState<'2d' | '3d'>('2d');
+  const [viewMode, setViewMode] = useState<'list' | 'timeline' | 'radar'>('list');
 
   const { showHelp, setShowHelp } = useKeyboardShortcuts({
     onEscape: () => {
@@ -267,6 +272,15 @@ export default function DashboardPage() {
               >
                 <GitBranch className="w-4 h-4" />
               </button>
+              <button
+                onClick={() => setViewMode('radar')}
+                className={`p-2 rounded-lg transition-all ${
+                  viewMode === 'radar' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-white/40 hover:text-white'
+                }`}
+                title="Radar View"
+              >
+                <Radar className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -277,7 +291,15 @@ export default function DashboardPage() {
             transition={{ delay: 0.5 }}
             className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden"
           >
-            {viewMode === 'timeline' ? (
+            {viewMode === 'radar' ? (
+              <div className="p-8 sm:p-12">
+                <div className="text-center mb-8">
+                  <h3 className="text-lg text-white font-light tracking-widest uppercase">Geospatial Detection Radar</h3>
+                  <p className="text-[10px] text-cyan-400/60 uppercase tracking-widest mt-1">Real-time localized violation mapping</p>
+                </div>
+                <ViolationRadar violations={data?.violations || []} />
+              </div>
+            ) : viewMode === 'timeline' ? (
               <div className="p-6">
                 <ViolationTimeline
                   violations={data?.violations || []}
@@ -417,9 +439,29 @@ export default function DashboardPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg text-white tracking-wider">{t('evidence')}</h3>
+                <div className="flex bg-white/5 rounded-lg p-1">
+                  <button
+                    onClick={() => setEvidenceMode('2d')}
+                    className={`px-3 py-1 text-[10px] uppercase tracking-wider rounded-md transition-all ${
+                      evidenceMode === '2d' ? 'bg-cyan-500 text-black font-medium' : 'text-white/40 hover:text-white'
+                    }`}
+                  >
+                    X-Ray View
+                  </button>
+                  <button
+                    onClick={() => setEvidenceMode('3d')}
+                    className={`px-3 py-1 text-[10px] uppercase tracking-wider rounded-md transition-all ${
+                      evidenceMode === '3d' ? 'bg-cyan-500 text-black font-medium' : 'text-white/40 hover:text-white'
+                    }`}
+                  >
+                    3D Replay
+                  </button>
+                </div>
                 <button 
-                  onClick={() => setShowEvidence(false)}
+                  onClick={() => {
+                    setShowEvidence(false);
+                    setEvidenceMode('2d');
+                  }}
                   className="text-white/40 hover:text-white transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -428,17 +470,28 @@ export default function DashboardPage() {
                 </button>
               </div>
               
-              <div className="aspect-video bg-white/5 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
-                {selectedViolation.evidenceImageUrl ? (
-                  <img 
-                    src={selectedViolation.evidenceImageUrl} 
-                    alt="Violation Evidence"
-                    className="w-full h-full object-cover"
+              <div className="mb-4">
+                {evidenceMode === '2d' ? (
+                  <EvidenceScanner 
+                    imageUrl={selectedViolation.evidenceImageUrl}
+                    intensity={selectedViolation.beamIntensity}
+                    confidence={selectedViolation.aiConfidence}
                   />
                 ) : (
-                  <div className="text-center text-white/30">
-                    <Camera className="w-12 h-12 mx-auto mb-2" />
-                    <p className="text-sm">{t('evidenceNotAvailable')}</p>
+                  <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-white/10">
+                    <CarScene 
+                      violationIntensity={selectedViolation.beamIntensity}
+                      focusSide={selectedViolation.beamIntensity > 80 ? 'both' : 'left'} 
+                    />
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      <div className="bg-black/60 backdrop-blur-md px-2 py-1 rounded border border-cyan-500/30">
+                        <span className="text-[9px] text-cyan-400 font-mono uppercase tracking-widest">3D Reconstruction</span>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 right-4 text-right">
+                      <p className="text-[8px] text-white/20 font-mono uppercase">Simulation Mode</p>
+                      <p className="text-[10px] text-white/60 font-mono uppercase">V-Intensity: {selectedViolation.beamIntensity}%</p>
+                    </div>
                   </div>
                 )}
               </div>
