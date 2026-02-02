@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    const logData = logDataRaw as DetectionLog | null;
+    const logData = logDataRaw as any;
 
     if (logError) {
       console.error('Failed to log detection:', logError);
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       .eq('vehicle_number', formattedPlate)
       .single();
 
-    const vehicleData = vehicleDataRaw as Partial<Vehicle> | null;
+    const vehicleData = vehicleDataRaw as any;
 
     // Create violation record
     const { data: violationRaw, error: violationError } = await supabase
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    const violation = violationRaw as Violation | null;
+    const violation = violationRaw as any;
 
     if (violationError || !violation) {
       console.error('Failed to create violation:', violationError);

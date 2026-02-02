@@ -26,7 +26,7 @@ export async function GET() {
       .eq('vehicle_number', session.vehicleNumber)
       .single();
 
-    const vehicle = vehicleData as Vehicle | null;
+    const vehicle = vehicleData as any;
 
     // Get all violations for this vehicle
     const { data: violationsData, error: violationsError } = await supabase
@@ -39,7 +39,7 @@ export async function GET() {
       console.error('Violations fetch error:', violationsError);
     }
 
-    const violationsList = (violationsData || []) as Violation[];
+    const violationsList = (violationsData || []) as any[];
 
     // Calculate totals
     const totalFines = violationsList.reduce((sum, v) => sum + Number(v.fine_amount), 0);

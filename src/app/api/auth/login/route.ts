@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       .eq('vehicle_number', formattedNumber)
       .single();
 
-    const vehicle = vehicleData as Vehicle | null;
+    const vehicle = vehicleData as any;
 
     if (vehicleError || !vehicle) {
       // For demo: Create vehicle if not exists
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const newVehicle = newVehicleData as Vehicle;
+      const newVehicle = newVehicleData as any;
 
       // Use newly created vehicle
       const token = await createToken({ vehicleNumber: formattedNumber });

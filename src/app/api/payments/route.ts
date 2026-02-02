@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       .eq('id', violationId)
       .single();
 
-    const violation = violationData as Violation | null;
+    const violation = violationData as any;
 
     if (violationError || !violation) {
       return NextResponse.json(
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    const payment = paymentData as Payment | null;
+    const payment = paymentData as any;
 
     if (paymentError || !payment) {
       console.error('Payment creation error:', paymentError);
@@ -132,7 +132,7 @@ export async function PUT(request: NextRequest) {
       .eq('id', paymentId)
       .single();
 
-    const payment = paymentData as Payment | null;
+    const payment = paymentData as any;
 
     if (paymentError || !payment) {
       return NextResponse.json(
@@ -158,7 +158,7 @@ export async function PUT(request: NextRequest) {
       .select()
       .single();
 
-    const updatedPayment = updatedPaymentData as Payment | null;
+    const updatedPayment = updatedPaymentData as any;
 
     if (updateError || !updatedPayment) {
       console.error('Payment update error:', updateError);

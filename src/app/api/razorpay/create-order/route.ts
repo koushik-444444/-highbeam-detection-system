@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       .eq('id', violationId)
       .single();
 
-    const violation = violationData as Violation | null;
+    const violation = violationData as any;
 
     if (violationError || !violation) {
       return NextResponse.json(
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    const payment = paymentData as Payment | null;
+    const payment = paymentData as any;
 
     if (paymentError || !payment) {
       console.error('Payment record creation error:', paymentError);

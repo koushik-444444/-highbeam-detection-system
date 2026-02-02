@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       .eq('gateway_order_id', razorpay_order_id)
       .single();
 
-    const payment = paymentData as Payment | null;
+    const payment = paymentData as any;
 
     if (paymentError || !payment) {
       return NextResponse.json(
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    const updatedPayment = updatedPaymentData as Payment | null;
+    const updatedPayment = updatedPaymentData as any;
 
     if (updateError || !updatedPayment) {
       console.error('Payment update error:', updateError);
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       .eq('id', payment.violation_id)
       .single();
 
-    const violation = violationData as Partial<Violation> | null;
+    const violation = violationData as any;
 
     return NextResponse.json({
       success: true,

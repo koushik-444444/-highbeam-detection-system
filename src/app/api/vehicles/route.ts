@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    const vehicle = vehicleData as Vehicle | null;
+    const vehicle = vehicleData as any;
 
     if (error || !vehicle) {
       console.error('Registration error:', error);
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
       .eq('vehicle_number', formattedNumber)
       .single();
 
-    const vehicle = vehicleData as Vehicle | null;
+    const vehicle = vehicleData as any;
 
     if (error || !vehicle) {
       return NextResponse.json(

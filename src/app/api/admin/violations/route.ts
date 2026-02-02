@@ -19,7 +19,7 @@ export async function GET() {
       console.error('Violations fetch error:', violationsError);
     }
 
-    const violationsList = (violations || []) as Violation[];
+    const violationsList: any[] = violations || [];
 
     // Calculate stats
     const totalViolations = violationsList.length;
@@ -102,7 +102,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updatedViolation = violation as Violation;
+    const updatedViolation: any = violation;
 
     return NextResponse.json({
       success: true,
