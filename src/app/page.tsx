@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { GlassCard, Button, Input, PoliceScanner, AnimatedGrid } from '@/components/ui';
+import LoadingAnimation from '@/components/LoadingAnimation';
 import { Car, Calendar, Shield, AlertTriangle } from 'lucide-react';
 
 // Dynamically import 3D scene to avoid SSR issues
@@ -12,7 +13,7 @@ const CarScene = dynamic(() => import('@/components/three/CarScene'), {
   ssr: false,
   loading: () => (
     <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex items-center justify-center">
-      <div className="text-cyan-400 text-xl animate-pulse">Loading 3D Scene...</div>
+      <LoadingAnimation width={500} height={280} fps={16} className="rounded-xl shadow-2xl" />
     </div>
   ),
 });
