@@ -133,7 +133,7 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
       {/* Main Login Overlay */}
       <AnimatePresence>
         {isVisible && (
-          <div className="fixed inset-0 z-10 flex items-end justify-center pb-[15vh] md:pb-[12vh]">
+          <div className="fixed inset-0 z-10 flex items-center justify-center">
             {/* Login Card - Positioned lower for automotive feel */}
             <motion.div
               initial={{ opacity: 0, y: 30, scale: 0.95 }}

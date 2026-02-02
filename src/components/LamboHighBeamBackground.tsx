@@ -382,32 +382,32 @@ export default function LamboHighBeamBackground({
         </div>
       )}
 
-      {/* Vignette Overlay - frames the Lamborghini */}
+      {/* Vignette Overlay - subtle framing */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 80% 70% at 50% 50%, 
+            radial-gradient(ellipse 90% 80% at 50% 50%, 
               transparent 0%, 
-              transparent 40%, 
-              rgba(0,0,0,0.3) 70%, 
-              rgba(0,0,0,0.7) 100%
+              transparent 60%, 
+              rgba(0,0,0,0.2) 85%, 
+              rgba(0,0,0,0.4) 100%
             )
           `,
         }}
       />
 
-      {/* Top and bottom gradient bars for cinematic look */}
+      {/* Top and bottom gradient bars - very subtle */}
       <div 
-        className="absolute top-0 left-0 right-0 h-24 pointer-events-none"
+        className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
         style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)',
         }}
       />
       <div 
-        className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%)',
         }}
       />
     </div>
