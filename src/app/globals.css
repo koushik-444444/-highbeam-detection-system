@@ -1,170 +1,224 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #050505;
+  --foreground: #f0f0f0;
+  --lambo-dark: #050505;
+  --lambo-accent: #a8c5e2;
+  --lambo-glow: #d4e5f7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
 }
 
-body {
-  background: var(--background);
+/* Base HTML/Body - No scroll, full viewport */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  background: var(--lambo-dark);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Selection */
+::selection {
+  background: rgba(168, 197, 226, 0.3);
+  color: white;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(168, 197, 226, 0.5);
+  outline-offset: 2px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+/* Remove default input styles */
+input, button {
+  font-family: inherit;
+  font-size: inherit;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Glassmorphism utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Glow effects */
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3),
-              0 0 40px rgba(0, 255, 255, 0.2),
-              0 0 60px rgba(0, 255, 255, 0.1);
-}
-
-.glow-red {
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3),
-              0 0 40px rgba(255, 0, 0, 0.2),
-              0 0 60px rgba(255, 0, 0, 0.1);
-}
-
-.glow-yellow {
-  box-shadow: 0 0 20px rgba(255, 255, 0, 0.3),
-              0 0 40px rgba(255, 255, 0, 0.2),
-              0 0 60px rgba(255, 255, 0, 0.1);
-}
-
-/* Text glow */
-.text-glow {
-  text-shadow: 0 0 10px currentColor,
-               0 0 20px currentColor,
-               0 0 30px currentColor;
-}
-
-/* Animation utilities */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 1;
-    filter: brightness(1);
-  }
-  50% {
-    opacity: 0.8;
-    filter: brightness(1.2);
-  }
-}
-
-@keyframes scanner {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(200%);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-scanner {
-  animation: scanner 3s linear infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* High beam flash effect */
-@keyframes beam-flash {
-  0%, 100% {
-    opacity: 0;
-  }
-  10%, 30% {
-    opacity: 1;
-  }
-  20%, 40% {
-    opacity: 0;
-  }
-}
-
-.beam-flash {
-  animation: beam-flash 0.5s ease-in-out;
-}
-
-/* Grid pattern background */
-.grid-pattern {
-  background-image: 
-    linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-/* Noise texture overlay */
-.noise-overlay {
-  position: relative;
-}
-
-.noise-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.03;
-  pointer-events: none;
-}
-
-/* Input focus styles */
 input:focus {
   outline: none;
 }
 
-/* Selection color */
-::selection {
-  background: rgba(0, 255, 255, 0.3);
-  color: white;
-}
-
-/* Canvas fix for Three.js */
+/* Canvas optimization */
 canvas {
   display: block;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Automotive HMI Typography */
+.hmi-title {
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.hmi-label {
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+}
+
+/* Icy glow effects */
+.glow-icy {
+  box-shadow: 
+    0 0 20px rgba(168, 197, 226, 0.15),
+    0 0 40px rgba(168, 197, 226, 0.1),
+    0 0 60px rgba(168, 197, 226, 0.05);
+}
+
+.glow-icy-strong {
+  box-shadow: 
+    0 0 20px rgba(212, 229, 247, 0.3),
+    0 0 40px rgba(212, 229, 247, 0.2),
+    0 0 80px rgba(212, 229, 247, 0.1);
+}
+
+.text-glow-icy {
+  text-shadow: 
+    0 0 10px rgba(212, 229, 247, 0.5),
+    0 0 20px rgba(212, 229, 247, 0.3),
+    0 0 40px rgba(212, 229, 247, 0.2);
+}
+
+/* Headlight shimmer animation */
+@keyframes headlight-shimmer {
+  0%, 100% {
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes subtle-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress-bar {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-headlight-shimmer {
+  animation: headlight-shimmer 4s ease-in-out infinite;
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-progress {
+  animation: progress-bar 2s ease-out forwards;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Input automotive styling */
+.input-automotive {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.input-automotive:focus {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(168, 197, 226, 0.4);
+  box-shadow: 0 0 20px rgba(168, 197, 226, 0.1);
+}
+
+.input-automotive::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Button automotive styling */
+.btn-automotive {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-automotive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(212, 229, 247, 0.15) 0%, rgba(212, 229, 247, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-automotive:hover::before {
+  opacity: 1;
+}
+
+.btn-automotive:hover {
+  border-color: rgba(168, 197, 226, 0.4);
+  box-shadow: 0 0 30px rgba(168, 197, 226, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-automotive:active {
+  transform: translateY(0);
+  box-shadow: 0 0 20px rgba(168, 197, 226, 0.2);
+}
+
+/* Hide scrollbar but allow scrolling if needed */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
