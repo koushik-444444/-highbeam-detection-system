@@ -154,7 +154,7 @@ export default function LamboHighBeamBackground({
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Draw frame to canvas
+  // Draw frame to canvas - HD quality
   const drawFrame = useCallback((ctx: CanvasRenderingContext2D, image: HTMLImageElement) => {
     const canvas = ctx.canvas;
     const dpr = window.devicePixelRatio || 1;
@@ -186,6 +186,10 @@ export default function LamboHighBeamBackground({
       destX = (canvasWidth - destWidth) / 2;
       destY = 0;
     }
+    
+    // Enable high quality image rendering
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -328,7 +332,7 @@ export default function LamboHighBeamBackground({
         )}
       </AnimatePresence>
 
-      {/* Canvas with zoom effect */}
+      {/* Canvas - HD quality rendering */}
       <motion.div
         className="absolute inset-0"
         animate={{ scale: isLoading ? 1 : zoomScale }}
@@ -337,7 +341,11 @@ export default function LamboHighBeamBackground({
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full"
-          style={{ backgroundColor: '#050505' }}
+          style={{ 
+            backgroundColor: '#050505',
+            imageRendering: 'auto',
+            WebkitFontSmoothing: 'antialiased',
+          }}
         />
       </motion.div>
 
