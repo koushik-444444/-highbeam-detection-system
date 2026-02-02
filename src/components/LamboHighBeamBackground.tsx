@@ -8,7 +8,19 @@ interface LamboHighBeamBackgroundProps {
 }
 
 const TOTAL_FRAMES = 192;
-const TARGET_FPS = 24; // Original animation timing (~0.042s per frame = 24fps)
+const TARGET_FPS = 24;
+
+// Particle configuration
+const PARTICLE_COUNT = 30;
+
+interface Particle {
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  opacity: number;
+}
 
 export default function LamboHighBeamBackground({
   onAnimationComplete,
@@ -20,18 +32,46 @@ export default function LamboHighBeamBackground({
   const currentFrameRef = useRef<number>(0);
   const isPlayingRef = useRef<boolean>(true);
   const loopCountRef = useRef<number>(0);
+  const particlesRef = useRef<Particle[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [currentFrame, setCurrentFrame] = useState(0);
 
   const frameInterval = 1000 / TARGET_FPS;
+
+  // Initialize particles
+  useEffect(() => {
+    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 0.5,
+      speedX: (Math.random() - 0.5) * 0.1,
+      speedY: (Math.random() - 0.5) * 0.05 - 0.02,
+      opacity: Math.random() * 0.5 + 0.1,
+    }));
+  }, []);
+
+  // Update particles
+  const updateParticles = useCallback(() => {
+    particlesRef.current = particlesRef.current.map(p => {
+      let newX = p.x + p.speedX;
+      let newY = p.y + p.speedY;
+      
+      // Wrap around
+      if (newX < 0) newX = 100;
+      if (newX > 100) newX = 0;
+      if (newY < 0) newY = 100;
+      if (newY > 100) newY = 0;
+      
+      return { ...p, x: newX, y: newY };
+    });
+  }, []);
 
   // Preload all 192 frames
   useEffect(() => {
     const loadImages = async () => {
       let loaded = 0;
-
-      // Load frames in batches for better performance
       const batchSize = 24;
       const batches = Math.ceil(TOTAL_FRAMES / batchSize);
       const allImages: HTMLImageElement[] = new Array(TOTAL_FRAMES);
@@ -57,7 +97,6 @@ export default function LamboHighBeamBackground({
               };
               
               img.onerror = () => {
-                // Create black fallback
                 const canvas = document.createElement('canvas');
                 canvas.width = 800;
                 canvas.height = 450;
@@ -97,7 +136,7 @@ export default function LamboHighBeamBackground({
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Draw frame to canvas - crops out Veo watermark from bottom-right
+  // Draw frame to canvas
   const drawFrame = useCallback((ctx: CanvasRenderingContext2D, image: HTMLImageElement) => {
     const canvas = ctx.canvas;
     const dpr = window.devicePixelRatio || 1;
@@ -107,48 +146,35 @@ export default function LamboHighBeamBackground({
     const imgWidth = image.naturalWidth || image.width;
     const imgHeight = image.naturalHeight || image.height;
     
-    // Crop settings to remove Veo watermark (bottom-right corner)
-    // Original frame: 800x450, watermark is ~120x35px in bottom-right
-    const cropRight = 0; // pixels to crop from right
-    const cropBottom = 40; // pixels to crop from bottom (hides watermark)
-    const cropTop = 0;
-    const cropLeft = 0;
+    const cropBottom = 40;
+    const srcX = 0;
+    const srcY = 0;
+    const srcWidth = imgWidth;
+    const srcHeight = imgHeight - cropBottom;
     
-    // Source dimensions (what we're taking from the image)
-    const srcX = cropLeft;
-    const srcY = cropTop;
-    const srcWidth = imgWidth - cropLeft - cropRight;
-    const srcHeight = imgHeight - cropTop - cropBottom;
-    
-    // Calculate cover scaling for cropped source
     const srcAspect = srcWidth / srcHeight;
     const canvasAspect = canvasWidth / canvasHeight;
     
     let destWidth, destHeight, destX, destY;
     
     if (canvasAspect > srcAspect) {
-      // Canvas is wider - fit to width
       destWidth = canvasWidth;
       destHeight = canvasWidth / srcAspect;
       destX = 0;
       destY = (canvasHeight - destHeight) / 2;
     } else {
-      // Canvas is taller - fit to height
       destHeight = canvasHeight;
       destWidth = canvasHeight * srcAspect;
       destX = (canvasWidth - destWidth) / 2;
       destY = 0;
     }
     
-    // Clear canvas
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    
-    // Draw cropped image (excludes watermark area)
     ctx.drawImage(
       image,
-      srcX, srcY, srcWidth, srcHeight,  // Source rectangle (crops out watermark)
-      destX, destY, destWidth, destHeight // Destination rectangle (fills canvas)
+      srcX, srcY, srcWidth, srcHeight,
+      destX, destY, destWidth, destHeight
     );
   }, []);
 
@@ -173,7 +199,6 @@ export default function LamboHighBeamBackground({
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
 
-    // Draw first frame
     if (imagesRef.current[0]) {
       drawFrame(ctx, imagesRef.current[0]);
     }
@@ -199,9 +224,14 @@ export default function LamboHighBeamBackground({
           drawFrame(ctx, image);
         }
 
+        // Update particles
+        updateParticles();
+        
+        // Update current frame state for effects
+        setCurrentFrame(frame);
+
         currentFrameRef.current++;
         
-        // Loop animation
         if (currentFrameRef.current >= TOTAL_FRAMES) {
           currentFrameRef.current = 0;
           loopCountRef.current++;
@@ -220,7 +250,13 @@ export default function LamboHighBeamBackground({
       window.removeEventListener('resize', updateCanvasSize);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [isLoading, frameInterval, onAnimationComplete, drawFrame]);
+  }, [isLoading, frameInterval, onAnimationComplete, drawFrame, updateParticles]);
+
+  // Calculate effects intensity based on current frame
+  // Frames 60-120 are typically the "high beam on + approaching" phase
+  const effectsIntensity = Math.min(1, Math.max(0, (currentFrame - 40) / 80));
+  const zoomScale = 1 + (effectsIntensity * 0.03); // Subtle 3% zoom at peak
+  const lensFlareOpacity = effectsIntensity * 0.4;
 
   return (
     <div className="fixed inset-0 z-0" style={{ backgroundColor: '#050505' }}>
@@ -234,16 +270,14 @@ export default function LamboHighBeamBackground({
             className="absolute inset-0 z-10 flex flex-col items-center justify-center"
             style={{ backgroundColor: '#050505' }}
           >
-            {/* Lamborghini-style loading */}
             <div className="flex flex-col items-center gap-8">
-              {/* Bull logo silhouette */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="relative"
               >
-                <svg viewBox="0 0 100 60" className="w-20 h-12 text-amber-500/80">
+                <svg viewBox="0 0 100 60" className="w-20 h-12 text-cyan-500/80">
                   <path
                     fill="currentColor"
                     d="M50 5 L20 25 L5 20 L15 35 L10 55 L30 45 L50 55 L70 45 L90 55 L85 35 L95 20 L80 25 L50 5Z"
@@ -252,15 +286,14 @@ export default function LamboHighBeamBackground({
                 <motion.div
                   animate={{ opacity: [0.3, 0.8, 0.3] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 blur-xl bg-amber-500/20"
+                  className="absolute inset-0 blur-xl bg-cyan-500/20"
                 />
               </motion.div>
 
-              {/* Progress */}
               <div className="flex flex-col items-center gap-3">
                 <div className="w-48 h-[2px] bg-white/10 overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                    className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400"
                     style={{ width: `${loadProgress}%` }}
                     transition={{ duration: 0.1 }}
                   />
@@ -274,14 +307,108 @@ export default function LamboHighBeamBackground({
         )}
       </AnimatePresence>
 
-      {/* Canvas */}
-      <motion.canvas
-        ref={canvasRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading ? 0 : 1 }}
-        transition={{ duration: 1 }}
-        className="absolute inset-0 w-full h-full"
-        style={{ backgroundColor: '#050505' }}
+      {/* Canvas with zoom effect */}
+      <motion.div
+        className="absolute inset-0"
+        animate={{ scale: isLoading ? 1 : zoomScale }}
+        transition={{ duration: 0.1, ease: 'linear' }}
+      >
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full"
+          style={{ backgroundColor: '#050505' }}
+        />
+      </motion.div>
+
+      {/* Lens Flare Effect - appears when headlights are bright */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{ opacity: isLoading ? 0 : lensFlareOpacity }}
+        transition={{ duration: 0.2 }}
+      >
+        {/* Central headlight glow */}
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px]"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(200,230,255,0.15) 0%, rgba(100,180,255,0.05) 40%, transparent 70%)',
+          }}
+        />
+        {/* Horizontal lens streak */}
+        <div 
+          className="absolute top-[45%] left-0 right-0 h-[2px]"
+          style={{
+            background: 'linear-gradient(90deg, transparent 20%, rgba(200,230,255,0.1) 40%, rgba(255,255,255,0.2) 50%, rgba(200,230,255,0.1) 60%, transparent 80%)',
+          }}
+        />
+        {/* Secondary flare spots */}
+        <div 
+          className="absolute top-[40%] left-[30%] w-8 h-8 rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(100,200,255,0.2) 0%, transparent 70%)',
+          }}
+        />
+        <div 
+          className="absolute top-[50%] left-[65%] w-12 h-12 rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(150,200,255,0.15) 0%, transparent 70%)',
+          }}
+        />
+      </motion.div>
+
+      {/* Floating Particles */}
+      {!isLoading && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {particlesRef.current.map((particle, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full bg-white"
+              style={{
+                left: `${particle.x}%`,
+                top: `${particle.y}%`,
+                width: particle.size,
+                height: particle.size,
+                opacity: particle.opacity * effectsIntensity,
+              }}
+              animate={{
+                opacity: [particle.opacity * 0.5, particle.opacity, particle.opacity * 0.5],
+              }}
+              transition={{
+                duration: 2 + Math.random() * 2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Vignette Overlay - frames the Lamborghini */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 70% at 50% 50%, 
+              transparent 0%, 
+              transparent 40%, 
+              rgba(0,0,0,0.3) 70%, 
+              rgba(0,0,0,0.7) 100%
+            )
+          `,
+        }}
+      />
+
+      {/* Top and bottom gradient bars for cinematic look */}
+      <div 
+        className="absolute top-0 left-0 right-0 h-24 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+        }}
+      />
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
+        }}
       />
     </div>
   );
