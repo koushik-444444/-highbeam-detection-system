@@ -143,11 +143,11 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
             >
               {/* Glassmorphism Card with Gradient Border */}
               <div className="relative group">
-                {/* Gradient border glow */}
+                {/* Gradient border glow - subtle */}
                 <div 
-                  className="absolute -inset-[1px] rounded-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                  className="absolute -inset-[1px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-500"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(100,200,255,0.3) 0%, rgba(50,150,255,0.1) 50%, rgba(100,200,255,0.3) 100%)',
+                    background: 'linear-gradient(135deg, rgba(100,200,255,0.2) 0%, rgba(50,150,255,0.05) 50%, rgba(100,200,255,0.2) 100%)',
                   }}
                 />
                 
@@ -159,8 +159,8 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
                   }}
                 />
                 
-                {/* Main card */}
-                <div className="relative bg-black/60 border border-white/10 rounded-2xl overflow-hidden">
+                {/* Main card - more transparent to show car */}
+                <div className="relative bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
                   {/* Animated top accent line */}
                   <motion.div 
                     className="h-[1px]"

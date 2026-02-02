@@ -9,6 +9,7 @@ interface LamboHighBeamBackgroundProps {
 
 const TOTAL_FRAMES = 192;
 const TARGET_FPS = 24;
+const FRAMES_TO_START = 48; // Start playing after loading first 2 seconds worth of frames
 
 // Particle configuration
 const PARTICLE_COUNT = 30;
@@ -37,6 +38,7 @@ export default function LamboHighBeamBackground({
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [canPlay, setCanPlay] = useState(false); // Can start playing early
 
   const frameInterval = 1000 / TARGET_FPS;
 
@@ -68,7 +70,7 @@ export default function LamboHighBeamBackground({
     });
   }, []);
 
-  // Preload all 192 frames
+  // Preload frames - start playing after first batch
   useEffect(() => {
     const loadImages = async () => {
       let loaded = 0;
@@ -93,6 +95,16 @@ export default function LamboHighBeamBackground({
                 allImages[i] = img;
                 loaded++;
                 setLoadProgress(Math.round((loaded / TOTAL_FRAMES) * 100));
+                
+                // Store images as they load so animation can access them
+                imagesRef.current = [...allImages];
+                
+                // Start playing early after first batch loads
+                if (loaded >= FRAMES_TO_START && !canPlay) {
+                  setCanPlay(true);
+                  setIsLoading(false);
+                }
+                
                 resolve();
               };
               
@@ -111,6 +123,13 @@ export default function LamboHighBeamBackground({
                   allImages[i] = fallbackImg;
                   loaded++;
                   setLoadProgress(Math.round((loaded / TOTAL_FRAMES) * 100));
+                  imagesRef.current = [...allImages];
+                  
+                  if (loaded >= FRAMES_TO_START && !canPlay) {
+                    setCanPlay(true);
+                    setIsLoading(false);
+                  }
+                  
                   resolve();
                 };
               };
@@ -121,11 +140,10 @@ export default function LamboHighBeamBackground({
       }
 
       imagesRef.current = allImages;
-      setIsLoading(false);
     };
 
     loadImages();
-  }, []);
+  }, [canPlay]);
 
   // Handle visibility change
   useEffect(() => {
@@ -180,7 +198,7 @@ export default function LamboHighBeamBackground({
 
   // Animation loop
   useEffect(() => {
-    if (isLoading || imagesRef.current.length === 0) return;
+    if (!canPlay || imagesRef.current.length === 0) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -217,6 +235,7 @@ export default function LamboHighBeamBackground({
         const frame = currentFrameRef.current;
         const image = imagesRef.current[frame];
         
+        // Only draw if the frame is loaded
         if (image) {
           const dpr = window.devicePixelRatio || 1;
           ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -232,6 +251,7 @@ export default function LamboHighBeamBackground({
 
         currentFrameRef.current++;
         
+        // Loop back to start, but only if we have frames loaded there
         if (currentFrameRef.current >= TOTAL_FRAMES) {
           currentFrameRef.current = 0;
           loopCountRef.current++;
@@ -250,7 +270,7 @@ export default function LamboHighBeamBackground({
       window.removeEventListener('resize', updateCanvasSize);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [isLoading, frameInterval, onAnimationComplete, drawFrame, updateParticles]);
+  }, [canPlay, frameInterval, onAnimationComplete, drawFrame, updateParticles]);
 
   // Calculate effects intensity based on current frame
   // Frames 60-120 are typically the "high beam on + approaching" phase
