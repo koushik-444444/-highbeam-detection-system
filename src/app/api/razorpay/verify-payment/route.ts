@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
-import { createAdminClient } from '@/lib/supabase';
+import { createAdminClient, Payment, Violation } from '@/lib/supabase';
 
 /**
  * Verify Razorpay Payment
@@ -42,11 +42,13 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
 
     // Find payment by Razorpay order ID
-    const { data: payment, error: paymentError } = await supabase
+    const { data: paymentData, error: paymentError } = await supabase
       .from('payments')
       .select('*')
       .eq('gateway_order_id', razorpay_order_id)
       .single();
+
+    const payment = paymentData as Payment | null;
 
     if (paymentError || !payment) {
       return NextResponse.json(
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
     const receiptNumber = `RCP-${payment.transaction_id}`;
 
     // Update payment record
-    const { data: updatedPayment, error: updateError } = await supabase
+    const { data: updatedPaymentData, error: updateError } = await supabase
       .from('payments')
       .update({
         gateway_payment_id: razorpay_payment_id,
@@ -67,12 +69,14 @@ export async function POST(request: NextRequest) {
         status: 'completed',
         receipt_number: receiptNumber,
         paid_at: new Date().toISOString(),
-      })
+      } as any)
       .eq('id', payment.id)
       .select()
       .single();
 
-    if (updateError) {
+    const updatedPayment = updatedPaymentData as Payment | null;
+
+    if (updateError || !updatedPayment) {
       console.error('Payment update error:', updateError);
       return NextResponse.json(
         { success: false, message: 'Failed to update payment status' },
@@ -83,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Update violation status to 'paid'
     const { error: violationError } = await supabase
       .from('violations')
-      .update({ status: 'paid' })
+      .update({ status: 'paid' } as any)
       .eq('id', payment.violation_id);
 
     if (violationError) {
@@ -91,11 +95,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Get violation details for response
-    const { data: violation } = await supabase
+    const { data: violationData } = await supabase
       .from('violations')
       .select('challan_number, vehicle_number')
       .eq('id', payment.violation_id)
       .single();
+
+    const violation = violationData as Partial<Violation> | null;
 
     return NextResponse.json({
       success: true,

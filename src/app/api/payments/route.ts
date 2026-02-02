@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient, generateTransactionId } from '@/lib/supabase';
+import { createAdminClient, generateTransactionId, Violation, Payment } from '@/lib/supabase';
 import { validateSession } from '@/lib/auth';
 
 /**
@@ -29,11 +29,13 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
 
     // Find violation
-    const { data: violation, error: violationError } = await supabase
+    const { data: violationData, error: violationError } = await supabase
       .from('violations')
       .select('*')
       .eq('id', violationId)
       .single();
+
+    const violation = violationData as Violation | null;
 
     if (violationError || !violation) {
       return NextResponse.json(
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
     const transactionId = generateTransactionId();
 
     // Create payment record
-    const { data: payment, error: paymentError } = await supabase
+    const { data: paymentData, error: paymentError } = await supabase
       .from('payments')
       .insert({
         violation_id: violation.id,
@@ -71,11 +73,13 @@ export async function POST(request: NextRequest) {
         transaction_id: transactionId,
         gateway_order_id: `order_${transactionId}`,
         status: 'pending',
-      })
+      } as any)
       .select()
       .single();
 
-    if (paymentError) {
+    const payment = paymentData as Payment | null;
+
+    if (paymentError || !payment) {
       console.error('Payment creation error:', paymentError);
       return NextResponse.json(
         { success: false, message: 'Failed to create payment' },
@@ -122,11 +126,13 @@ export async function PUT(request: NextRequest) {
     const supabase = createAdminClient();
 
     // Find payment
-    const { data: payment, error: paymentError } = await supabase
+    const { data: paymentData, error: paymentError } = await supabase
       .from('payments')
       .select('*')
       .eq('id', paymentId)
       .single();
+
+    const payment = paymentData as Payment | null;
 
     if (paymentError || !payment) {
       return NextResponse.json(
@@ -139,7 +145,7 @@ export async function PUT(request: NextRequest) {
     const receiptNumber = `RCP-${payment.transaction_id}`;
 
     // Update payment to completed
-    const { data: updatedPayment, error: updateError } = await supabase
+    const { data: updatedPaymentData, error: updateError } = await supabase
       .from('payments')
       .update({
         status: 'completed',
@@ -147,12 +153,14 @@ export async function PUT(request: NextRequest) {
         receipt_number: receiptNumber,
         receipt_url: `/api/payments/receipt/${payment.id}`,
         paid_at: new Date().toISOString(),
-      })
+      } as any)
       .eq('id', paymentId)
       .select()
       .single();
 
-    if (updateError) {
+    const updatedPayment = updatedPaymentData as Payment | null;
+
+    if (updateError || !updatedPayment) {
       console.error('Payment update error:', updateError);
       return NextResponse.json(
         { success: false, message: 'Failed to update payment' },
@@ -163,7 +171,7 @@ export async function PUT(request: NextRequest) {
     // Update violation status to paid
     await supabase
       .from('violations')
-      .update({ status: 'paid' })
+      .update({ status: 'paid' } as any)
       .eq('id', payment.violation_id);
 
     return NextResponse.json({

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import razorpayInstance from '@/lib/razorpay';
-import { createAdminClient, generateTransactionId } from '@/lib/supabase';
+import { createAdminClient, generateTransactionId, Violation, Payment } from '@/lib/supabase';
 import { validateSession } from '@/lib/auth';
 
 /**
@@ -31,11 +31,13 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
 
     // Get violation details
-    const { data: violation, error: violationError } = await supabase
+    const { data: violationData, error: violationError } = await supabase
       .from('violations')
       .select('*')
       .eq('id', violationId)
       .single();
+
+    const violation = violationData as Violation | null;
 
     if (violationError || !violation) {
       return NextResponse.json(
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Store payment record in database
-    const { data: payment, error: paymentError } = await supabase
+    const { data: paymentData, error: paymentError } = await supabase
       .from('payments')
       .insert({
         violation_id: violationId,
@@ -87,11 +89,13 @@ export async function POST(request: NextRequest) {
         transaction_id: transactionId,
         gateway_order_id: razorpayOrder.id,
         status: 'pending',
-      })
+      } as any)
       .select()
       .single();
 
-    if (paymentError) {
+    const payment = paymentData as Payment | null;
+
+    if (paymentError || !payment) {
       console.error('Payment record creation error:', paymentError);
       return NextResponse.json(
         { success: false, message: 'Failed to create payment record' },

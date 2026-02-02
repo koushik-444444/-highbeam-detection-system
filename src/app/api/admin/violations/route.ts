@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase';
+import { createAdminClient, Violation } from '@/lib/supabase';
 
 /**
  * Get all violations for admin dashboard
@@ -19,7 +19,7 @@ export async function GET() {
       console.error('Violations fetch error:', violationsError);
     }
 
-    const violationsList = violations || [];
+    const violationsList = (violations || []) as Violation[];
 
     // Calculate stats
     const totalViolations = violationsList.length;
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
         status: newStatus,
         reviewed_at: new Date().toISOString(),
         review_notes: notes,
-      })
+      } as any)
       .eq('id', violationId)
       .select()
       .single();
@@ -102,13 +102,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const updatedViolation = violation as Violation;
+
     return NextResponse.json({
       success: true,
       message: `Violation ${newStatus}`,
       violation: {
-        _id: violation.id,
-        status: violation.status,
-        challanNumber: violation.challan_number,
+        _id: updatedViolation.id,
+        status: updatedViolation.status,
+        challanNumber: updatedViolation.challan_number,
       },
     });
 

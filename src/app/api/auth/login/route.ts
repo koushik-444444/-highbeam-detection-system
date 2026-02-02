@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient, formatVehicleNumber } from '@/lib/supabase';
+import { createAdminClient, formatVehicleNumber, Vehicle } from '@/lib/supabase';
 import { createToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -26,21 +26,23 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
 
     // Look up vehicle in database
-    const { data: vehicle, error: vehicleError } = await supabase
+    const { data: vehicleData, error: vehicleError } = await supabase
       .from('vehicles')
       .select('*')
       .eq('vehicle_number', formattedNumber)
       .single();
 
+    const vehicle = vehicleData as Vehicle | null;
+
     if (vehicleError || !vehicle) {
       // For demo: Create vehicle if not exists
-      const { data: newVehicle, error: createError } = await supabase
+      const { data: newVehicleData, error: createError } = await supabase
         .from('vehicles')
         .insert({
           vehicle_number: formattedNumber,
           owner_name: 'Vehicle Owner',
           owner_dob: dob,
-        })
+        } as any)
         .select()
         .single();
 
@@ -50,6 +52,8 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
+
+      const newVehicle = newVehicleData as Vehicle;
 
       // Use newly created vehicle
       const token = await createToken({ vehicleNumber: formattedNumber });
@@ -86,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for violations
-    const { data: violations, error: violationsError } = await supabase
+    const { data: violations } = await supabase
       .from('violations')
       .select('id, status')
       .eq('vehicle_number', formattedNumber)

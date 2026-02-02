@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase';
+import { createAdminClient, Violation, Vehicle } from '@/lib/supabase';
 import { validateSession } from '@/lib/auth';
 
 /**
@@ -20,14 +20,16 @@ export async function GET() {
     const supabase = createAdminClient();
 
     // Get vehicle info
-    const { data: vehicle, error: vehicleError } = await supabase
+    const { data: vehicleData } = await supabase
       .from('vehicles')
       .select('*')
       .eq('vehicle_number', session.vehicleNumber)
       .single();
 
+    const vehicle = vehicleData as Vehicle | null;
+
     // Get all violations for this vehicle
-    const { data: violations, error: violationsError } = await supabase
+    const { data: violationsData, error: violationsError } = await supabase
       .from('violations')
       .select('*')
       .eq('vehicle_number', session.vehicleNumber)
@@ -37,7 +39,7 @@ export async function GET() {
       console.error('Violations fetch error:', violationsError);
     }
 
-    const violationsList = violations || [];
+    const violationsList = (violationsData || []) as Violation[];
 
     // Calculate totals
     const totalFines = violationsList.reduce((sum, v) => sum + Number(v.fine_amount), 0);

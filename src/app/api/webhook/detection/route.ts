@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient, uploadEvidenceImage, formatVehicleNumber } from '@/lib/supabase';
+import { createAdminClient, uploadEvidenceImage, formatVehicleNumber, DetectionLog, Violation, Vehicle } from '@/lib/supabase';
 
 /**
  * ESP32/n8n Webhook Endpoint
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Log the raw detection for debugging
-    const { data: logData, error: logError } = await supabase
+    const { data: logDataRaw, error: logError } = await supabase
       .from('detection_logs')
       .insert({
         raw_payload: body,
@@ -56,9 +56,11 @@ export async function POST(request: NextRequest) {
         source_ip: request.headers.get('x-forwarded-for') || 'unknown',
         camera_id: body.camera_id,
         processed: false,
-      })
+      } as any)
       .select()
       .single();
+
+    const logData = logDataRaw as DetectionLog | null;
 
     if (logError) {
       console.error('Failed to log detection:', logError);
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
       if (logData) {
         await supabase
           .from('detection_logs')
-          .update({ error_message: 'Missing vehicle_number', processed: true })
+          .update({ error_message: 'Missing vehicle_number', processed: true } as any)
           .eq('id', logData.id);
       }
       
@@ -99,7 +101,7 @@ export async function POST(request: NextRequest) {
       if (logData) {
         await supabase
           .from('detection_logs')
-          .update({ error_message: 'Beam intensity too low', processed: true })
+          .update({ error_message: 'Beam intensity too low', processed: true } as any)
           .eq('id', logData.id);
       }
       
@@ -119,14 +121,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Look up vehicle in database to get owner info
-    const { data: vehicleData } = await supabase
+    const { data: vehicleDataRaw } = await supabase
       .from('vehicles')
       .select('id, owner_name, phone_number, email')
       .eq('vehicle_number', formattedPlate)
       .single();
 
+    const vehicleData = vehicleDataRaw as Partial<Vehicle> | null;
+
     // Create violation record
-    const { data: violation, error: violationError } = await supabase
+    const { data: violationRaw, error: violationError } = await supabase
       .from('violations')
       .insert({
         vehicle_id: vehicleData?.id || null,
@@ -141,17 +145,19 @@ export async function POST(request: NextRequest) {
         camera_id: camera_id || 'UNKNOWN',
         device_id: device_id,
         status: 'pending', // Requires admin approval
-      })
+      } as any)
       .select()
       .single();
 
-    if (violationError) {
+    const violation = violationRaw as Violation | null;
+
+    if (violationError || !violation) {
       console.error('Failed to create violation:', violationError);
       
       if (logData) {
         await supabase
           .from('detection_logs')
-          .update({ error_message: violationError.message, processed: true })
+          .update({ error_message: violationError?.message || 'Unknown error', processed: true } as any)
           .eq('id', logData.id);
       }
       
@@ -165,7 +171,7 @@ export async function POST(request: NextRequest) {
     if (logData) {
       await supabase
         .from('detection_logs')
-        .update({ violation_id: violation.id, processed: true })
+        .update({ violation_id: violation.id, processed: true } as any)
         .eq('id', logData.id);
     }
 

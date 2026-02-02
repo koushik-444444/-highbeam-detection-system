@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient, formatVehicleNumber } from '@/lib/supabase';
+import { createAdminClient, formatVehicleNumber, Vehicle } from '@/lib/supabase';
 
 /**
  * Register a new vehicle owner
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create vehicle record
-    const { data: vehicle, error } = await supabase
+    const { data: vehicleData, error } = await supabase
       .from('vehicles')
       .insert({
         vehicle_number: formattedNumber,
@@ -44,11 +44,13 @@ export async function POST(request: NextRequest) {
         phone_number: phoneNumber,
         email: email,
         address: address,
-      })
+      } as any)
       .select()
       .single();
 
-    if (error) {
+    const vehicle = vehicleData as Vehicle | null;
+
+    if (error || !vehicle) {
       console.error('Registration error:', error);
       return NextResponse.json(
         { success: false, message: 'Failed to register vehicle' },
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     if (violations && violations.length > 0) {
       await supabase
         .from('violations')
-        .update({ vehicle_id: vehicle.id })
+        .update({ vehicle_id: vehicle.id } as any)
         .eq('vehicle_number', formattedNumber);
     }
 
@@ -108,11 +110,13 @@ export async function GET(request: NextRequest) {
     const formattedNumber = formatVehicleNumber(vehicleNumber);
     const supabase = createAdminClient();
 
-    const { data: vehicle, error } = await supabase
+    const { data: vehicleData, error } = await supabase
       .from('vehicles')
       .select('*')
       .eq('vehicle_number', formattedNumber)
       .single();
+
+    const vehicle = vehicleData as Vehicle | null;
 
     if (error || !vehicle) {
       return NextResponse.json(
