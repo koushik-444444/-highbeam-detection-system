@@ -92,7 +92,7 @@ export default function LamboLoginOverlay({ isVisible }: LamboLoginOverlayProps)
               className="w-full max-w-[280px]"
             >
               {/* Glass Card - Semi-transparent to see car behind */}
-              <div className="relative bg-black/50 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden">
+              <div className="relative bg-black/50 border border-white/10 rounded-xl overflow-hidden">
                 {/* Top accent line - cool blue/white to match headlights */}
                 <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
                 
